@@ -35,7 +35,7 @@ public final class IndexMenu extends SimpleInventory {
 
         InventoryItem viewerInfo = InventoryItem.of(
                 new ItemBuilder(
-                        Material.SKULL_ITEM, 3
+                        Material.LEGACY_SKULL_ITEM, 3
                 ).skullOwner(
                         viewer.getName()
                 ).name("§aSuas informações").lore(

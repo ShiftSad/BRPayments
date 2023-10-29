@@ -1,5 +1,6 @@
 package me.toddydev.bukkit.task;
 
+import de.tr7zw.nbtapi.NBT;
 import me.toddydev.bukkit.BukkitMain;
 import me.toddydev.bukkit.events.PaymentCompletedEvent;
 import me.toddydev.bukkit.events.PaymentExpiredEvent;
@@ -8,15 +9,12 @@ import me.toddydev.core.database.tables.Tables;
 import me.toddydev.core.model.order.Order;
 import me.toddydev.core.model.order.status.OrderStatus;
 import me.toddydev.core.services.Services;
-import okhttp3.OkHttp;
-import okhttp3.OkHttpClient;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Arrays;
 
 import static me.toddydev.core.model.order.status.OrderStatus.PAID;
 import static org.bukkit.Material.MAP;
@@ -52,23 +50,15 @@ public class PayTask extends BukkitRunnable {
 
             Tables.getOrders().update(order);
 
-            for (ItemStack item : player.getInventory().getContents()) {
-                if (item == null)continue;
-                if (item.getType() != MAP)continue;
+            Arrays.stream(player.getInventory().getContents())
+                    .filter(item ->
+                            item != null &&
+                            item.getType() == MAP &&
+                            NBT.readNbt(item).getString("brpayments:order") != null
+                    ).forEach(item -> player.getInventory().remove(item));
 
-                net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
-                if (nms.getTag() == null)continue;
-
-                if (nms.getTag().getString("brpayments:order") == null)continue;
-
-                player.getInventory().remove(item);
-            }
-
-            if (status == PAID) {
-                Bukkit.getPluginManager().callEvent(new PaymentCompletedEvent(player, order));
-            } else {
-                Bukkit.getPluginManager().callEvent(new PaymentExpiredEvent(player, order));
-            }
+            if (status == PAID) Bukkit.getPluginManager().callEvent(new PaymentCompletedEvent(player, order));
+            else Bukkit.getPluginManager().callEvent(new PaymentExpiredEvent(player, order));
 
             Caching.getOrdersCache().remove(order);
         }

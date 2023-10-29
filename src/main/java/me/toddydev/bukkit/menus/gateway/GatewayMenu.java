@@ -6,7 +6,7 @@ import com.henryfabio.minecraft.inventoryapi.item.InventoryItem;
 import com.henryfabio.minecraft.inventoryapi.viewer.Viewer;
 import me.toddydev.bukkit.BukkitMain;
 import me.toddydev.bukkit.menus.products.ProductsMenu;
-import me.toddydev.core.api.qrcore.ImageCreator;
+import me.toddydev.core.api.map.ImageCreator;
 import me.toddydev.core.cache.Caching;
 import me.toddydev.core.database.tables.Tables;
 import me.toddydev.core.model.order.Order;
@@ -39,7 +39,7 @@ public class GatewayMenu extends SimpleInventory {
     protected void configureInventory(Viewer v, InventoryEditor e) {
         Player player = v.getPlayer();
 
-        e.setItem(13, InventoryItem.of(new ItemBuilder(Material.SKULL_ITEM, 3)
+        e.setItem(13, InventoryItem.of(new ItemBuilder(Material.LEGACY_SKULL_ITEM, 3)
                         .name("§aPague com §bMercado Pago§a!")
                         .texture("c0c9a3a4ffbee61d1ee1c3a533355bda9cdc377e07b0ff8bc618d3977b7f86cc")
                         .lore(

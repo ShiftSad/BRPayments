@@ -2,6 +2,7 @@ package me.toddydev.bukkit.loaders.products;
 
 import me.toddydev.core.cache.Caching;
 import me.toddydev.core.model.order.gateway.Gateway;
+import me.toddydev.core.model.order.gateway.type.GatewayType;
 import me.toddydev.core.model.product.Product;
 import me.toddydev.core.model.product.actions.Action;
 import me.toddydev.core.model.product.actions.screen.Screen;
@@ -10,7 +11,6 @@ import me.toddydev.core.model.product.categories.Category;
 import me.toddydev.core.model.product.icon.Icon;
 import me.toddydev.core.model.product.rewards.Reward;
 import me.toddydev.core.model.product.rewards.item.RewardItem;
-import me.toddydev.core.model.order.gateway.type.GatewayType;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -19,6 +19,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,15 @@ public class ProductLoader {
             try {
                 file.createNewFile();
                 InputStream r = plugin.getResource("products/produto.yml");
-                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(r);
+
+                File tempFile = File.createTempFile("temp-", ".yml");
+                tempFile.deleteOnExit(); // This will delete the file when the JVM exits
+
+                assert r != null;
+                Files.copy(r, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                // Convert InputStream to File
+                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(tempFile);
                 yaml.save(file);
             } catch (Exception e) {
                 plugin.getServer().getConsoleSender().sendMessage("[BRPayments] Não foi possível criar um arquivo de exemplo.");
@@ -136,7 +146,7 @@ public class ProductLoader {
                 try {
                     sound = Sound.valueOf(config.getString("actions." + s + ".sound").toUpperCase());
                 } catch (Exception e) {
-                    sound = Sound.LEVEL_UP;
+                    sound = Sound.ENTITY_EXPERIENCE_ORB_PICKUP;
                     config.set("actions." + s + ".sound", "LEVEL_UP");
                     Bukkit.getConsoleSender().sendMessage("[BRPayments] Não foi possível encontrar o som " + config.getString("actions." + s + ".sound") + " para o produto " + product.getName() + ". Portanto foi alterado para LEVEL_UP.");
                 }

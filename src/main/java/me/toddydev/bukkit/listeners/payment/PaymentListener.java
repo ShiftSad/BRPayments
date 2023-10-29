@@ -1,32 +1,32 @@
 package me.toddydev.bukkit.listeners.payment;
 
+import de.tr7zw.nbtapi.NBT;
 import me.toddydev.bukkit.BukkitMain;
 import me.toddydev.bukkit.events.PaymentCompletedEvent;
 import me.toddydev.bukkit.events.PaymentExpiredEvent;
 import me.toddydev.core.Core;
-import me.toddydev.core.api.actionbar.ActionBar;
 import me.toddydev.core.api.taskchain.TaskChain;
 import me.toddydev.core.cache.Caching;
 import me.toddydev.core.model.product.Product;
 import me.toddydev.core.model.product.actions.Action;
 import me.toddydev.core.model.product.actions.type.ActionType;
 import me.toddydev.core.player.User;
-import me.toddydev.discord.enums.MessageChannel;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.utils.data.DataObject;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.github.paperspigot.Title;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import static me.toddydev.discord.enums.MessageChannel.SELL;
@@ -42,17 +42,10 @@ public class PaymentListener implements Listener {
 
         Action action = product.getActions().stream().filter(a -> a.getType().equals(ActionType.COLLECT)).findAny().orElse(null);
 
-        player.playSound(player.getLocation(), action.getSound(), 5f, 5f);
-        player.sendTitle(new Title(action.getScreen().getTitle().replace("&", "§"), action.getScreen().getSubtitle().replace("&", "§"), 10, 40, 10));
+        title(player, product, action);
 
-        player.sendMessage(action.getMessage()
+        player.sendActionBar(action.getActionBar()
                 .replace("&", "§")
-                .replace("{player}", player.getName())
-                .replace("{displayName}", player.getDisplayName())
-                .replace("{product}", product.getName())
-        );
-
-        ActionBar.sendActionBar(player, action.getActionBar().replace("&", "§")
                 .replace("{player}", player.getName())
                 .replace("{displayName}", player.getDisplayName())
                 .replace("{product}", product.getName())
@@ -66,10 +59,7 @@ public class PaymentListener implements Listener {
                     if (stack == null)continue;
                     if (stack.getType() != MAP)continue;
 
-                    net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(stack);
-
-                    if (nms.getTag() == null)continue;
-                    if (nms.getTag().getString("brpayments:order") == null)continue;
+                    if (NBT.readNbt(stack).getString("brpayments:order") == null) continue;
 
                     player.getInventory().setItem(slot, user.getItemInHand());
                     user.setItemInHand(null);
@@ -123,17 +113,24 @@ public class PaymentListener implements Listener {
 
         Action action = product.getActions().stream().filter(a -> a.getType().equals(ActionType.EXPIRED)).findAny().orElse(null);
 
-        player.playSound(player.getLocation(), action.getSound(), 5f, 5f);
-        player.sendTitle(new Title(action.getScreen().getTitle().replace("&", "§"), action.getScreen().getSubtitle().replace("&", "§"), 10, 40, 10));
+        assert action != null;
+        title(player, product, action);
 
-        player.sendMessage(action.getMessage()
+        player.sendActionBar(action.getActionBar()
                 .replace("&", "§")
                 .replace("{player}", player.getName())
                 .replace("{displayName}", player.getDisplayName())
                 .replace("{product}", product.getName())
         );
+    }
 
-        ActionBar.sendActionBar(player, action.getActionBar()
+    private void title(Player player, Product product, Action action) {
+        player.playSound(player.getLocation(), action.getSound(), 5f, 5f);
+        player.sendTitlePart(TitlePart.TITLE, PlainTextComponentSerializer.plainText().deserialize(action.getScreen().getTitle().replace("&", "§")));
+        player.sendTitlePart(TitlePart.SUBTITLE, PlainTextComponentSerializer.plainText().deserialize(action.getScreen().getSubtitle().replace("&", "§")));
+        player.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.of(1, ChronoUnit.SECONDS), Duration.of(2, ChronoUnit.SECONDS), Duration.of(1, ChronoUnit.SECONDS)));
+
+        player.sendMessage(action.getMessage()
                 .replace("&", "§")
                 .replace("{player}", player.getName())
                 .replace("{displayName}", player.getDisplayName())

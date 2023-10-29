@@ -1,7 +1,6 @@
 package me.toddydev.bukkit.listeners.interaction;
 
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-import org.bukkit.entity.Item;
+import de.tr7zw.nbtapi.NBT;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,12 +19,8 @@ public class InteractionListener implements Listener {
     public void onDropItem(PlayerDropItemEvent event) {
         ItemStack item = event.getItemDrop().getItemStack();
 
-        if (item.getType() != MAP)return;
-
-        net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
-
-        if (nms.getTag() == null)return;
-        if (nms.getTag().getString("brpayments:order") == null)return;
+        if (item.getType() != MAP) return;
+        if (NBT.readNbt(item).getString("brpayments:order") == null) return;
 
         event.setCancelled(true);
     }
@@ -35,13 +30,9 @@ public class InteractionListener implements Listener {
         ItemStack item = event.getItem();
 
         if (item == null)return;
+        if (item.getType() != MAP) return;
 
-        if (item.getType() != MAP)return;
-
-        net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
-
-        if (nms.getTag() == null)return;
-        if (nms.getTag().getString("brpayments:order") == null)return;
+        NBT.readNbt(item).getString("brpayments:order");
 
         event.setCancelled(true);
     }
@@ -55,10 +46,7 @@ public class InteractionListener implements Listener {
 
         if (item.getType() != MAP)return;
 
-        net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
-
-        if (nms.getTag() == null)return;
-        if (nms.getTag().getString("brpayments:order") == null)return;
+        NBT.readNbt(item).getString("brpayments:order");
 
         event.setCancelled(true);
     }
