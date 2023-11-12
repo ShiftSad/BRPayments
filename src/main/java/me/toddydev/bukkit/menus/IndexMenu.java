@@ -11,6 +11,7 @@ import me.toddydev.core.utils.item.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.net.URL;
 import java.util.Locale;
 
 public final class IndexMenu extends SimpleInventory {
@@ -35,10 +36,8 @@ public final class IndexMenu extends SimpleInventory {
 
         InventoryItem viewerInfo = InventoryItem.of(
                 new ItemBuilder(
-                        Material.LEGACY_SKULL_ITEM, 3
-                ).skullOwner(
-                        viewer.getName()
-                ).name("§aSuas informações").lore(
+                        Material.PLAYER_HEAD, 3
+                ).name("§aSuas informações").lore( // TODO >> Player head
                         "§7Visualize suas estatísticas.",
                         "",
                         "  §8§l⬤ §fSeu saldo: §2R$§a" + String.format(new Locale("pt", "BR"), "%.2f", user.getBalance()),
@@ -47,8 +46,8 @@ public final class IndexMenu extends SimpleInventory {
                         "  §8§l⬤ §fTotal de Pedidos: §a" + user.getTotalOrders(),
                         "  §8§l⬤ §fTotal Reembolsado: §a" + user.getTotalRefunded(),
                         "",
-                        "§eClique para fechar.")
-                        .build()
+                        "§eClique para fechar."
+                ).build()
         ).defaultCallback(event -> {
             event.setCancelled(true);
             viewer.closeInventory();

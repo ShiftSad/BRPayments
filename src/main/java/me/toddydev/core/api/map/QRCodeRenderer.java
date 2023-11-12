@@ -23,12 +23,14 @@ public class QRCodeRenderer extends MapRenderer {
     }
 
     private void load(String data) {
-        BufferedImage image = null;
         try {
-            image = ImageIO.read(new URL(
+            var url = new URL(
                     String.format("https://chart.googleapis.com/chart?chs=128x128&cht=qr&chl=%s&choe=UTF-8", data)
-            ));
+            );
+
+            image = ImageIO.read(url);
             image = MapPalette.resizeImage(image);
+            System.out.println("Loaded QRCode image from " + url.toString());
         } catch (IOException e) {
             Logger.getLogger("QRCodeRenderer").severe("Failed to load QRCode image! You probably don't have a stable internet connection.");
         }
@@ -41,5 +43,7 @@ public class QRCodeRenderer extends MapRenderer {
 
         mapCanvas.drawImage(0, 0, image);
         done = true;
+
+        System.out.println("Image done rendering!");
     }
 }

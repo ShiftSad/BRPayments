@@ -4,3 +4,4 @@ main: me.toddydev.bukkit.BukkitMain
 author: Toddy
 softdepend:
   - PlaceholderAPI
+api-version: 1.13
